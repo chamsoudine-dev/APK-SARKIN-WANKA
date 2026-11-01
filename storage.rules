@@ -1,0 +1,9 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Non utilisé par la nouvelle version : tout est refusé par sécurité.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

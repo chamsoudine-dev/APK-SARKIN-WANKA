@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#A67C00">
+    <link rel="apple-touch-icon" href="assets/img/logo.png">
+    <link rel="icon" type="image/png" href="assets/img/logo.png">
+    <link rel="manifest" href="manifest.json">
+    <title>SARKIN WANKA NIGER — Paramètres</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.v2.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+</head>
+<body class="light-theme">
+<div class="app-container">
+    <nav class="sidebar glass-panel">
+        <div class="sidebar-header" style="justify-content:center;padding:16px 0 0;">
+            <div class="logo" style="flex-direction:column;gap:8px;margin-bottom:2rem;">
+                <img src="assets/img/logo.png" alt="SARKIN WANKA NIGER" style="width:100px;height:100px;border-radius:50%;object-fit:cover;box-shadow:0 4px 16px rgba(166,124,0,0.4),0 0 0 3px #A67C00;"><div style="font-size:0.65rem;color:var(--primary-color);font-weight:700;margin-top:2px;letter-spacing:1px;opacity:0.8;">v3.0</div>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html"><i class="fa-solid fa-calendar-day"></i> Agenda</a></li>
+            <li><a href="atelier.html"><i class="fa-solid fa-tape"></i> Atelier</a></li>
+            <li><a href="boutique.html" style="display:flex;justify-content:space-between;align-items:center;"><span><i class="fa-solid fa-store"></i> Boutique</span><span class="boutique-badge badge badge-success" style="display:none;font-size:0.7rem;padding:2px 6px;">0</span></a></li>
+            <li><a href="bibliotheque.html"><i class="fa-solid fa-book-open"></i> Bibliothèque</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <button id="theme-toggle" class="btn-icon"><i class="fa-solid fa-moon"></i></button>
+        </div>
+    </nav>
+
+    <nav class="bottom-nav">
+        <ul>
+            <li><a href="index.html"><i class="fa-solid fa-calendar-day"></i><span>Agenda</span></a></li>
+            <li><a href="atelier.html"><i class="fa-solid fa-tape"></i><span>Atelier</span></a></li>
+            <li style="position:relative;"><a href="boutique.html"><i class="fa-solid fa-store"></i><span>Boutique</span><span class="boutique-badge badge badge-success" style="display:none;position:absolute;top:5px;right:15%;font-size:0.6rem;padding:2px 5px;min-width:16px;border:2px solid var(--surface-color);">0</span></a></li>
+            <li><a href="bibliotheque.html"><i class="fa-solid fa-book-open"></i><span>Biblio</span></a></li>
+            <li class="active"><a href="parametre.html"><i class="fa-solid fa-gear"></i><span>Réglages</span></a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div>
+                <h1><i class="fa-solid fa-gear" style="color:var(--primary-color);font-size:1.8rem;"></i> Paramètres</h1>
+                <p class="subtitle">Gérer votre profil et vos préférences</p>
+            </div>
+        </header>
+
+        <section class="agenda-section">
+            <div class="settings-card">
+                <h2 class="settings-section-title">Profil &amp; Entreprise</h2>
+
+                <div class="form-group" style="text-align:center;margin-bottom:1.8rem;">
+                    <img id="profile-pic-preview" src="assets/img/logo.png"
+                         style="width:90px;height:90px;border-radius:50%;object-fit:cover;margin-bottom:12px;border:3px solid var(--primary-color);box-shadow:var(--shadow-gold);">
+                    <br>
+                    <label for="profile-upload" class="btn btn-secondary" style="cursor:pointer;display:inline-flex;margin-top:8px;">
+                        <i class="fa-solid fa-camera"></i> Changer la photo
+                    </label>
+                    <input type="file" id="profile-upload" accept="image/*" style="display:none;">
+                </div>
+
+                <div class="form-group">
+                    <label>Nom de l'entreprise ou Tailleur</label>
+                    <input type="text" id="setting-name" value="Sarkin Wanka Fashion Design">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Téléphone principal</label>
+                        <input type="tel" id="setting-phone" value="+227 92 62 27 64">
+                    </div>
+                    <div class="form-group">
+                        <label>Devise</label>
+                        <select id="setting-currency">
+                            <option value="FCFA">FCFA</option>
+                            <option value="EUR">Euro (€)</option>
+                            <option value="USD">Dollar ($)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Adresse de l'Atelier</label>
+                    <input type="text" id="setting-address" value="Niamey, Niger">
+                </div>
+
+                <div style="margin-top:1.5rem;">
+                    <button type="button" class="btn btn-primary" id="save-btn" style="width:100%;justify-content:center;padding:13px;" onclick="doSaveSettings()">
+                        <i class="fa-solid fa-save"></i> Enregistrer les modifications
+                    </button>
+                </div>
+            </div>
+
+            <!-- Section Tailleurs -->
+            <div class="settings-card" style="margin-top:1.5rem;">
+                <h2 class="settings-section-title">Équipe de tailleurs</h2>
+                <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+                    <input type="text" id="new-t-user" placeholder="Nom du tailleur (ex : Ibrahim)" style="flex:1;min-width:140px;padding:11px 14px;border:var(--border-subtle);border-radius:var(--border-radius-sm);background:var(--bg-color);color:var(--text-main);font-family:'Outfit';font-size:16px;">
+                    <button class="btn btn-primary" onclick="doAddTailor()"><i class="fa-solid fa-plus"></i> Créer</button>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table style="width:100%;border-collapse:collapse;">
+                        <thead>
+                            <tr style="border-bottom:2px solid rgba(166,124,0,0.12);">
+                                <th style="padding:10px;font-size:0.76rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;">Tailleur</th>
+                                <th style="padding:10px;text-align:right;font-size:0.76rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tailors-list-body"><tr><td colspan="2" style="padding:16px;text-align:center;color:var(--text-muted)"><i class="fa-solid fa-spinner fa-spin"></i> Chargement…</td></tr></tbody>
+                    </table>
+                </div>
+                <div style="margin-top:1.2rem;">
+                    <button class="btn btn-secondary" style="width:100%;justify-content:center;" onclick="window.open('tailleur.html','_blank')">
+                        <i class="fa-solid fa-scissors"></i> Accéder à l'Espace Tailleur
+                    </button>
+                </div>
+                </div>
+            </div>
+
+            <!-- Zone de Danger / Maintenance -->
+            <div class="settings-card" style="margin-top:1.5rem; border:1px solid #ff000022; background:rgba(211,47,47,0.03);">
+                <h2 class="settings-section-title" style="color:var(--danger-color);"><i class="fa-solid fa-triangle-exclamation"></i> Zone de Danger (Maintenance)</h2>
+                <div class="form-group">
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">Ces outils permettent de supprimer massivement les données du serveur. <strong>Attention : cette action est définitive.</strong></p>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <button class="btn btn-secondary" style="color:var(--danger-color); border-color:var(--danger-color); font-size:0.8rem; justify-content:center;" onclick="doBulkDelete('livre')">
+                        <i class="fa-solid fa-broom"></i> Vider Historique (Livrés)
+                    </button>
+                    <button class="btn btn-secondary" style="color:var(--danger-color); border-color:var(--danger-color); font-size:0.8rem; justify-content:center;" onclick="doBulkDelete('all')">
+                        <i class="fa-solid fa-trash-can"></i> Tout Supprimer
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="assets/js/app.v2.js?v=3.0.0"></script>
+<script>
+async function loadSettingsUI() {
+    const s = await getSettings();
+    if (s.name)     document.getElementById('setting-name').value    = s.name;
+    if (s.phone)    document.getElementById('setting-phone').value   = s.phone;
+    if (s.address)  document.getElementById('setting-address').value = s.address;
+    if (s.currency) document.getElementById('setting-currency').value = s.currency;
+    if (s.photo)    document.getElementById('profile-pic-preview').src = s.photo;
+}
+
+async function doSaveSettings() {
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enregistrement…';
+
+    const photo = document.getElementById('profile-pic-preview').src;
+    // Ne pas stocker de base64 massif si c'est l'avatar par défaut
+    const photoToStore = photo.startsWith('data:') ? photo : photo;
+
+    const s = {
+        name:     document.getElementById('setting-name').value,
+        phone:    document.getElementById('setting-phone').value,
+        address:  document.getElementById('setting-address').value,
+        currency: document.getElementById('setting-currency').value,
+        photo:    photoToStore
+    };
+    await saveSettings(s);
+
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Enregistré !';
+    btn.style.background = 'var(--success-color)';
+    setTimeout(() => {
+        btn.innerHTML = '<i class="fa-solid fa-save"></i> Enregistrer les modifications';
+        btn.style.background = '';
+        btn.disabled = false;
+    }, 2000);
+}
+
+async function loadTailorsUI() {
+    const body = document.getElementById('tailors-list-body');
+    if (!body) return;
+    const tailors = await getTailors();
+    body.innerHTML = '';
+    if (tailors.length === 0) {
+        body.innerHTML = '<tr><td colspan="2" style="padding:16px;text-align:center;color:var(--text-muted);font-size:0.9rem;">Aucun tailleur configuré.</td></tr>';
+        return;
+    }
+    tailors.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = 'var(--border-subtle)';
+        tr.innerHTML = `
+            <td style="padding:12px 10px;font-weight:600;"><i class="fa-solid fa-user-tie" style="color:var(--primary-color);margin-right:8px;"></i>${t.username}</td>
+            <td style="padding:12px 10px;text-align:right;">
+                <button class="btn btn-secondary" style="padding:5px 10px;font-size:0.8rem;color:var(--danger-color);" onclick="doDelT('${t.username}')"><i class="fa-solid fa-trash"></i></button>
+            </td>`;
+        body.appendChild(tr);
+    });
+}
+
+async function doAddTailor() {
+    const u = document.getElementById('new-t-user').value.trim();
+    if (!u) { showToast("Écrivez le nom du tailleur.", "error"); return; }
+    const tailors = await getTailors();
+    if (tailors.find(x => x.username.toLowerCase() === u.toLowerCase())) {
+        showToast("Ce tailleur existe déjà.", "error"); return;
+    }
+    await addTailor(u);
+    document.getElementById('new-t-user').value = '';
+    showToast(`${u} ajouté à l'équipe !`);
+    loadTailorsUI();
+}
+
+async function doDelT(u) {
+    const ok = await showConfirmModal(`Retirer ${u} de l'équipe ?`);
+    if (!ok) return;
+    await deleteTailor(u);
+    showToast(`${u} retiré de l'équipe.`);
+    loadTailorsUI();
+}
+
+document.getElementById('profile-upload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => { document.getElementById('profile-pic-preview').src = ev.target.result; };
+    reader.readAsDataURL(file);
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadSettingsUI();
+    await loadTailorsUI();
+});
+</script>
+</body>
+</html>

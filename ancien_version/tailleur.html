@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#A67C00">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="assets/img/logo.png">
+    <link rel="icon" type="image/png" href="assets/img/logo.png">
+    <title>SARKIN WANKA NIGER — Espace Tailleur</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.v2.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+</head>
+<body class="light-theme">
+
+<!-- CHOIX DU TAILLEUR (sans mot de passe) -->
+<div id="login-container" style="display:flex;justify-content:center;align-items:center;min-height:100vh;padding:2rem;background:var(--bg-color);">
+    <div class="glass-panel" style="padding:2.5rem;max-width:420px;width:100%;text-align:center;">
+        <img src="assets/img/logo.png" alt="SARKIN WANKA NIGER" style="width:120px;height:120px;border-radius:50%;object-fit:cover;box-shadow:0 6px 20px rgba(166,124,0,0.4),0 0 0 4px #A67C00;margin-bottom:1.5rem;">
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;margin-bottom:0.3rem;">Qui êtes-vous ?</h2>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1.5rem;">Touchez votre nom pour voir vos travaux.</p>
+        <div id="tailor-picker" class="tailor-picker"></div>
+        <form id="login-form" style="margin-top:1rem;">
+            <div class="form-group" style="text-align:left;">
+                <label>Ou écrivez votre nom</label>
+                <input type="text" id="login-user" placeholder="Votre prénom" autocomplete="off">
+            </div>
+            <button type="submit" id="login-btn" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:4px;">
+                <i class="fa-solid fa-arrow-right"></i> Continuer
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- DASHBOARD TAILLEUR -->
+<div class="app-container" id="dashboard-container" style="display:none;">
+    <nav class="sidebar glass-panel">
+        <div class="sidebar-header" style="justify-content:center;padding:16px 0 0;">
+            <div class="logo" style="flex-direction:column;gap:8px;margin-bottom:2rem;">
+                <img src="assets/img/logo.png" alt="SARKIN WANKA NIGER" style="width:100px;height:100px;border-radius:50%;object-fit:cover;box-shadow:0 4px 16px rgba(166,124,0,0.4),0 0 0 3px #A67C00;"><div style="font-size:0.65rem;color:var(--primary-color);font-weight:700;margin-top:2px;letter-spacing:1px;opacity:0.8;">v3.0</div>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li class="active" id="nav-tasks"><a href="#" onclick="showTab('tasks');return false;"><i class="fa-solid fa-tape"></i> Mes Travaux</a></li>
+            <li id="nav-profile"><a href="#" onclick="showTab('profile');return false;"><i class="fa-solid fa-user"></i> Mon Profil</a></li>
+        </ul>
+        <div class="sidebar-footer" style="padding-top:1.5rem;">
+            <button id="theme-toggle" class="btn-icon"><i class="fa-solid fa-moon"></i></button>
+            <a href="#" onclick="logout();return false;" class="btn-icon" title="Changer de tailleur" style="text-decoration:none;color:var(--danger-color);"><i class="fa-solid fa-right-from-bracket"></i></a>
+        </div>
+    </nav>
+
+    <!-- Bottom nav mobile -->
+    <nav class="bottom-nav">
+        <ul>
+            <li class="active" id="bnav-tasks"><a href="#" onclick="showTab('tasks');return false;"><i class="fa-solid fa-tape"></i><span>Travaux</span></a></li>
+            <li id="bnav-profile"><a href="#" onclick="showTab('profile');return false;"><i class="fa-solid fa-user"></i><span>Profil</span></a></li>
+            <li><a href="#" onclick="logout();return false;" style="color:var(--danger-color);"><i class="fa-solid fa-right-from-bracket"></i><span>Changer</span></a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div>
+                <h1><i class="fa-solid fa-shirt" style="color:var(--primary-color);font-size:1.8rem;"></i> Bonjour, <span id="tailor-name-display"></span> !</h1>
+                <p class="subtitle" id="header-subtitle">Voici les pièces qui vous sont assignées.</p>
+            </div>
+        </header>
+
+        <!-- Onglet Travaux -->
+        <section id="tab-tasks" class="agenda-section">
+            <div class="agenda-header"><h2>Mes travaux en cours</h2></div>
+            <div class="atelier-grid" id="tailleur-list">
+                <div class="loading-state" style="grid-column:1/-1"><i class="fa-solid fa-spinner fa-spin"></i> Chargement…</div>
+            </div>
+        </section>
+
+        <!-- Onglet Profil -->
+        <section id="tab-profile" class="agenda-section" style="display:none;">
+            <div class="settings-card">
+                <h2 class="settings-section-title">Mes préférences</h2>
+                <div class="form-group">
+                    <label><i class="fa-solid fa-music" style="color:var(--primary-color);"></i> Son de notification</label>
+                    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:10px;">Ce son jouera quand un nouveau travail vous est assigné. <strong>Laissez vide pour désactiver.</strong></p>
+                    <input type="file" id="audio-upload" accept="audio/*" style="font-family:'Outfit';font-size:0.9rem;">
+                    <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+                        <button class="btn btn-primary" onclick="saveAudio()"><i class="fa-solid fa-save"></i> Enregistrer</button>
+                        <button class="btn btn-secondary" onclick="testAudio()"><i class="fa-solid fa-play"></i> Tester</button>
+                        <button class="btn btn-secondary" style="color:var(--danger-color);" onclick="removeAudio()"><i class="fa-solid fa-volume-xmark"></i> Supprimer le son</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="assets/js/app.v2.js?v=3.0.0"></script>
+<script>
+// Variable globale pour l'espace tailleur
+let currentTailorUser = localStorage.getItem('sw_tailor');
+
+function checkAuth() {
+    if (currentTailorUser) {
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('dashboard-container').style.display = 'flex';
+        document.getElementById('tailor-name-display').innerText = currentTailorUser;
+        // Initialiser le dashboard SEULEMENT ici (pas de son au chargement)
+        initDashboard();
+    } else {
+        document.getElementById('login-container').style.display = 'flex';
+        document.getElementById('dashboard-container').style.display = 'none';
+    }
+}
+
+async function initDashboard() {
+    await renderTailleur();
+    // Démarrer le polling de notifications (son uniquement sur nouveaux travaux réels)
+    startTailorPolling(currentTailorUser);
+}
+
+function chooseTailor(name) {
+    name = (name || '').trim();
+    if (!name) return;
+    localStorage.setItem('sw_tailor', name);
+    currentTailorUser = name;
+    checkAuth();
+}
+document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    chooseTailor(document.getElementById('login-user').value);
+});
+async function loadTailorPicker() {
+    const box = document.getElementById('tailor-picker');
+    const tailors = await getTailors();
+    box.innerHTML = '';
+    tailors.forEach(tl => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'btn btn-secondary tailor-pick';
+        b.innerHTML = '<i class="fa-solid fa-user-tie"></i> ' + esc(tl.username);
+        b.onclick = () => chooseTailor(tl.username);
+        box.appendChild(b);
+    });
+}
+function logout() {
+    stopTailorPolling();
+    localStorage.removeItem('sw_tailor');
+    currentTailorUser = null;
+    checkAuth();
+}
+
+function showTab(tab) {
+    document.getElementById('tab-tasks').style.display   = tab === 'tasks'   ? 'block' : 'none';
+    document.getElementById('tab-profile').style.display = tab === 'profile' ? 'block' : 'none';
+    document.getElementById('nav-tasks').classList.toggle('active', tab === 'tasks');
+    document.getElementById('nav-profile').classList.toggle('active', tab === 'profile');
+    if (document.getElementById('bnav-tasks')) {
+        document.getElementById('bnav-tasks').classList.toggle('active', tab === 'tasks');
+        document.getElementById('bnav-profile').classList.toggle('active', tab === 'profile');
+    }
+    document.getElementById('header-subtitle').innerText = tab === 'tasks'
+        ? 'Voici les pièces qui vous sont assignées.'
+        : 'Réglez vos notifications.';
+}
+
+let audioBase64 = null;
+document.getElementById('audio-upload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    // Vérifier taille max 2MB pour le son
+    if (file.size > 2 * 1024 * 1024) { showToast("Fichier trop grand (max 2MB)", "error"); return; }
+    const reader = new FileReader();
+    reader.onload = ev => { audioBase64 = ev.target.result; };
+    reader.readAsDataURL(file);
+});
+
+function saveAudio() {
+    if (!audioBase64) { showToast("Sélectionnez d'abord un fichier audio.", "error"); return; }
+    localStorage.setItem('sw_audio_' + currentTailorUser, audioBase64);
+    showToast('Son de notification enregistré !');
+}
+
+function removeAudio() {
+    localStorage.removeItem('sw_audio_' + currentTailorUser);
+    audioBase64 = null;
+    document.getElementById('audio-upload').value = '';
+    showToast('Son de notification supprimé.');
+}
+
+function testAudio() {
+    const src = localStorage.getItem('sw_audio_' + currentTailorUser);
+    if (!src) { showToast("Aucun son configuré.", "error"); return; }
+    try { new Audio(src).play().catch(() => showToast("Erreur de lecture audio.", "error")); }
+    catch(e) { showToast("Format audio non supporté.", "error"); }
+}
+
+document.addEventListener('DOMContentLoaded', async () => { await new Promise(r => setTimeout(r, 400)); checkAuth(); loadTailorPicker(); });
+</script>
+</body>
+</html>
