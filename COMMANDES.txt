@@ -1,0 +1,68 @@
+SARKIN WANKA v4.1 - COMMANDES A COPIER-COLLER DANS CMD
+=======================================================
+(Dossier du projet : C:\Users\lenovo\Desktop\APK-SARKIN-WANKA-main)
+
+ETAPE 0 - Installer les fichiers (une seule fois)
+  Le zip contient les fichiers a la racine (pas de sous-dossier). Telechargez-le, puis dans CMD
+  (adaptez le chemin du zip s'il n'est pas dans Telechargements) :
+
+    tar -xf "%USERPROFILE%\Downloads\SarkinWanka-v4.1-projet.zip" -C "C:\Users\lenovo\Desktop\APK-SARKIN-WANKA-main"
+
+  Cela remplace les fichiers du projet. Votre cle android\sarkin-wanka.keystore n'est pas dans le zip : elle reste en place.
+  Verification (doit afficher les 3 fichiers, sans "introuvable") :
+
+    cd /d C:\Users\lenovo\Desktop\APK-SARKIN-WANKA-main && dir package.json android\sarkin-wanka.keystore android\keystore.properties
+
+  Si "introuvable" : il y a peut-etre un 2e dossier APK-SARKIN-WANKA-main a l'interieur.
+  Remplacez alors le chemin par ...\APK-SARKIN-WANKA-main\APK-SARKIN-WANKA-main dans toutes les commandes.
+
+ETAPE 1 - Connexion a Firebase (une seule fois)
+  Une page web s'ouvre : connectez-vous avec le compte Google du projet "sarkin-wanka" (identifiant sarkin-wanka-71b0d).
+
+    cd /d C:\Users\lenovo\Desktop\APK-SARKIN-WANKA-main && npx firebase-tools@latest login
+
+ETAPE 2 - Premiere publication COMPLETE (cree l'APK + active les mises a jour)
+  Tapez 2 quand on vous le demande, puis acceptez le numero propose (4.1.0).
+  Duree : 5 a 30 minutes. Attendez la ligne "Verifie en ligne ... publiee".
+
+    cd /d C:\Users\lenovo\Desktop\APK-SARKIN-WANKA-main && PUBLIER.bat
+
+  Resultat : SarkinWanka.apk sur le Bureau (copie dans le dossier dist).
+  Firebase gratuit interdit d'heberger un APK : l'APK est donc mis sur GitHub (Releases).
+  A la fin, le script affiche 3 gestes a faire a la main (1 minute) : ouvrir la page
+  "Releases" indiquee, glisser dist\SarkinWanka.apk, cliquer "Publish release".
+  AVANT d'installer l'APK sur un telephone : Parametres > Exporter une sauvegarde.
+  Installez l'APK PAR-DESSUS l'ancienne version (sans desinstaller).
+
+ETAPE 3 - Envoyer sur GitHub
+
+    cd /d C:\Users\lenovo\Desktop\APK-SARKIN-WANKA-main && GIT_ENVOYER.bat
+
+  Depot : https://github.com/chamsoudine-dev/APK-SARKIN-WANKA (deja renseigne dans le fichier).
+  Le depot est public mais ne contient ni cle ni mot de passe (verifie). Pour le rendre prive :
+  GitHub > Settings > Danger Zone > Change visibility.
+
+CHAQUE FOIS QUE VOUS MODIFIEZ L'APPLICATION (index.html, logos...)
+  1. Enregistrez vos modifications.
+  2. Mise a jour rapide (la plupart du temps) :
+
+    cd /d C:\Users\lenovo\Desktop\APK-SARKIN-WANKA-main && PUBLIER.bat
+
+     -> tapez 1, un numero de version (Entree = suivant), une phrase de nouveautes. ~2 minutes.
+     (une mise a jour complete, choix 2, demande en plus la Release GitHub de l'APK)
+  3. Les utilisateurs ouvrent Parametres > Mises a jour > "Mettre a jour maintenant".
+  4. Si vous avez modifie la partie Android (android\...) ou ajoute un plugin : choisissez 2.
+  5. Puis GIT_ENVOYER.bat pour sauvegarder sur GitHub.
+
+TEST SANS RIEN PUBLIER (APK seulement, sur le Bureau)
+
+    cd /d C:\Users\lenovo\Desktop\APK-SARKIN-WANKA-main && COMPILER.bat
+
+SI LA MISE EN LIGNE ECHOUE (tout est deja pret dans le dossier hosting)
+
+    cd /d C:\Users\lenovo\Desktop\APK-SARKIN-WANKA-main && npx firebase-tools@latest deploy --only hosting --project sarkin-wanka-71b0d
+
+IMPORTANT
+  - Ne perdez JAMAIS android\sarkin-wanka.keystore (copiez-le sur une cle USB / Drive prive) :
+    sans lui, impossible de mettre a jour l'APK sur les telephones deja installes.
+  - L'ancienne commande qui augmentait "versionCode" n'est plus a utiliser : c'est automatique.

@@ -1,0 +1,59 @@
+name: Construire l'APK
+
+on:
+  workflow_dispatch:   # à lancer à la main (onglet Actions) : la clé de signature n'est plus dans le dépôt
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Préparer l'application (www + synchronisation Android)
+        run: npm run sync
+
+      - name: Restaurer la clé de signature (secrets GitHub)
+        env:
+          SW_KEYSTORE_B64: ${{ secrets.SW_KEYSTORE_B64 }}
+          SW_STORE_PASSWORD: ${{ secrets.SW_STORE_PASSWORD }}
+        run: |
+          echo "$SW_KEYSTORE_B64" | base64 -d > android/sarkin-wanka.keystore
+          printf 'storeFile=../sarkin-wanka.keystore\nstorePassword=%s\nkeyAlias=sarkinwanka\nkeyPassword=%s\n' "$SW_STORE_PASSWORD" "$SW_STORE_PASSWORD" > android/keystore.properties
+
+      - name: Construire l'APK signé
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Renommer l'APK
+        run: cp android/app/build/outputs/apk/release/app-release.apk SarkinWanka.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SarkinWanka-APK
+          path: SarkinWanka.apk
+
+      - name: Publier dans « Releases » (lien de téléchargement à partager)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-latest
+          name: Sarkin Wanka — APK (dernière version)
+          body: "Téléchargez SarkinWanka.apk, envoyez-le par WhatsApp, puis installez-le sur Android."
+          files: SarkinWanka.apk

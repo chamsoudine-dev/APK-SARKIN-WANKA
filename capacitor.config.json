@@ -1,0 +1,19 @@
+{
+  "appId": "com.sarkinwanka.atelier",
+  "appName": "Sarkin Wanka",
+  "webDir": "www",
+  "backgroundColor": "#000000",
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "CapacitorUpdater": {
+      "autoUpdate": false,
+      "updateUrl": "",
+      "statsUrl": "",
+      "channelUrl": "",
+      "resetWhenUpdate": true,
+      "appReadyTimeout": 15000
+    }
+  }
+}

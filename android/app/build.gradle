@@ -1,0 +1,78 @@
+apply plugin: 'com.android.application'
+
+// --- Réglages de signature : lus dans android/keystore.properties (jamais dans Git) ou en variables d'environnement ---
+def swProps = new Properties()
+def swPropsFile = rootProject.file("keystore.properties")
+if (swPropsFile.exists()) { swPropsFile.withInputStream { swProps.load(it) } }
+def swGet = { String k, String env -> swProps.getProperty(k) ?: System.getenv(env) }
+// --- Numéro de version : package.json (versionName) + horodatage en minutes (versionCode, toujours croissant) ---
+def swPkg = new groovy.json.JsonSlurper().parseText(file("../../package.json").text)
+def swCode = System.getenv("SW_VERSION_CODE") ? System.getenv("SW_VERSION_CODE").toInteger() : (int) Math.floorDiv(System.currentTimeMillis(), 60000L)
+
+android {
+    namespace "com.sarkinwanka.atelier"
+    compileSdk rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "com.sarkinwanka.atelier"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode swCode
+        versionName swPkg.version
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    signingConfigs {
+        release {
+            storeFile file(swGet("storeFile", "SW_KEYSTORE_FILE") ?: "../sarkin-wanka.keystore")
+            storePassword swGet("storePassword", "SW_STORE_PASSWORD")
+            keyAlias swGet("keyAlias", "SW_KEY_ALIAS") ?: "sarkinwanka"
+            keyPassword swGet("keyPassword", "SW_KEY_PASSWORD")
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+gradle.taskGraph.whenReady { graph ->
+    if (graph.hasTask(":app:assembleRelease") && !swGet("storePassword", "SW_STORE_PASSWORD")) {
+        throw new GradleException("Signature impossible : fichier android/keystore.properties absent ou incomplet (voir COMMANDES.txt).")
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

@@ -1,0 +1,8 @@
+{
+  "published": true,
+  "minNative": "4.1.0",
+  "apk": {
+    "version": "4.1.0",
+    "notes": "Version initiale avec mises a jour integrees"
+  }
+}
